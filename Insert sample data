@@ -1,0 +1,5 @@
+INSERT INTO Inventory (item_name, quantity, price)
+VALUES
+    ('Laptop', 10, 750.00),
+    ('Mouse', 50, 15.99),
+    ('Keyboard', 30, 25.00);
