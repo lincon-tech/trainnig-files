@@ -2,11 +2,16 @@ param (
     [string]$resourceGroup = "<YourResourceGroup>",
     [string]$vmName = "<YourVMName>"
 )
-# Authenticate using Managed Identity
+
+# Authenticate with Azure using the managed identity of the automation account or VM
 Connect-AzAccount -Identity
-# Confirm login
+
+# Confirm the current context
 $context = Get-AzContext
-Write-Output "Running as: $($context.Account)"
-# Stop the VM
+Write-Output "Authenticated as: $($context.Account)"
+
+# Stop the specified virtual machine
+Write-Output "Stopping VM '$vmName' in resource group '$resourceGroup'..."
 Stop-AzVM -ResourceGroupName $resourceGroup -Name $vmName -Force
 
+Write-Output "VM '$vmName' has been successfully stopped."
