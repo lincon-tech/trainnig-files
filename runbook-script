@@ -1,0 +1,12 @@
+param (
+    [string]$resourceGroup = "<YourResourceGroup>",
+    [string]$vmName = "<YourVMName>"
+)
+# Authenticate using Managed Identity
+Connect-AzAccount -Identity
+# Confirm login
+$context = Get-AzContext
+Write-Output "Running as: $($context.Account)"
+# Stop the VM
+Stop-AzVM -ResourceGroupName $resourceGroup -Name $vmName -Force
+
