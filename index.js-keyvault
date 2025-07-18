@@ -1,0 +1,33 @@
+const express = require('express');
+const { AzureCliCredential } = require('@azure/identity');
+const { SecretClient } = require('@azure/keyvault-secrets');
+
+const app = express();
+const port = 3000;
+
+const keyVaultName = '<your keyvault name>';
+const keyVaultUrl = `https://${keyVaultName}.vault.azure.net`;
+
+const credential = new AzureCliCredential();
+const client = new SecretClient(keyVaultUrl, credential);
+
+// Root route
+app.get('/', (req, res) => {
+    res.send('Welcome! Try <a href="/secret">/secret</a> to fetch the Key Vault secret.');
+});
+
+// Secret route
+app.get('/secret', async (req, res) => {
+    try {
+        const secret = await client.getSecret('MySecretName');
+        console.log('Secret Value:', secret.value);
+        res.send('✅ Secret retrieved. Check console.');
+    } catch (error) {
+        console.error('❌ Error retrieving secret:', error.message);
+        res.status(500).send('Failed to retrieve secret.');
+    }
+});
+
+app.listen(port, () => {
+    console.log(`App running at http://localhost:${port}`);
+});
