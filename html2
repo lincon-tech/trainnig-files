@@ -1,0 +1,6 @@
+cat >> index.html << 'EOF'
+<div>
+    <h2>About This Project</h2>
+    <p>This project demonstrates Git version control concepts including branching, merging, and collaboration.</p>
+</div>
+EOF
