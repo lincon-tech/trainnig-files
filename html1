@@ -1,0 +1,9 @@
+cat >> index.html << 'EOF'
+<div>
+    <h2>Features</h2>
+    <ul>
+        <li>Basic HTML structure</li>
+        <li>Version controlled with Git</li>
+    </ul>
+</div>
+EOF
