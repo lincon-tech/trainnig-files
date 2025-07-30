@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tony's Pizza Palace</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>🍕 Tony's Pizza Palace</h1>
+        <p>Order your favorite pizza online!</p>
+
+        <form method="POST" action="{{ url_for('order') }}" class="order-form">
+            <div class="form-group">
+                <label for="customer_name">Your Name:</label>
+                <input type="text" id="customer_name" name="customer_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="customer_phone">Phone Number:</label>
+                <input type="tel" id="customer_phone" name="customer_phone" required>
+            </div>
+
+            <div class="form-group">
+                <label for="pizza">Choose Your Pizza:</label>
+                <select id="pizza" name="pizza" required>
+                    <option value="">Select a pizza...</option>
+                    {% for key, pizza in menu.items() %}
+                    <option value="{{ key }}">${{ pizza.price }} - {{ pizza.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="size">Size:</label>
+                <select id="size" name="size" required>
+                    <option value="">Select size...</option>
+                    {% for key, size in sizes.items() %}
+                    <option value="{{ key }}">{{ size.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="order-btn">Place Order 🍕</button>
+        </form>
+
+        <div class="footer">
+            <a href="{{ url_for('view_orders') }}">View All Orders</a>
+        </div>
+    </div>
+</body>
+
+</html>
