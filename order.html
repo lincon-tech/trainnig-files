@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Orders - Tony's Pizza</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>📋 All Orders</h1>
+
+        {% if orders %}
+        {% for order_id, order in orders.items() %}
+        <div class="order-card">
+            <h3>Order #{{ order.id }}</h3>
+            <p><strong>Customer:</strong> {{ order.customer_name }}</p>
+            <p><strong>Pizza:</strong> {{ order.pizza }} ({{ order.size }})</p>
+            <p><strong>Total:</strong> ${{ order.price }}</p>
+            <p><strong>Time:</strong> {{ order.timestamp }}</p>
+            <p><strong>Status:</strong> {{ order.status }}</p>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p>No orders yet. <a href="{{ url_for('index') }}">Place the first order!</a></p>
+        {% endif %}
+
+        <div class="footer">
+            <a href="{{ url_for('index') }}">Back to Menu</a>
+        </div>
+    </div>
+</body>
+
+</html>
