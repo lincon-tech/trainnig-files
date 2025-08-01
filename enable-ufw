@@ -1,0 +1,4 @@
+sudo ufw enable
+sudo ufw allow <port>
+sudo ufw reload
+sudo ufw status
