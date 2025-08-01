@@ -1,0 +1,4 @@
+docker run -d \
+  --name pizza-container \
+  -p 3000:3000 \
+  pizza-app:v1.0
