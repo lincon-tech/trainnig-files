@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Create EKS cluster
+eksctl create cluster \
+  --name my-first-cluster \
+  --version 1.28 \
+  --region us-west-2 \
+  --nodegroup-name workers \
+  --node-type t3.medium \
+  --nodes 2 \
+  --nodes-min 1 \
+  --nodes-max 4
