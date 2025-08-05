@@ -1,29 +1,32 @@
-#INSTALL AWS CLI    
+#!/bin/bash
+# Update and install dependencies
+apt-get update -y
+apt-get upgrade -y
+apt-get install -y curl unzip apt-transport-https ca-certificates gnupg lsb-release software-properties-common
+
+# Install AWS CLI v2
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-sudo apt install unzip
 unzip awscliv2.zip
-sudo ./aws/install
-aws --version
+./aws/install
+ln -s /usr/local/bin/aws /usr/bin/aws
 
-#INSTALL kubectl
-sudo apt-get update
-sudo apt-get install -y apt-transport-https ca-certificates curl
+# Install kubectl (latest stable)
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+ln -s /usr/local/bin/kubectl /usr/bin/kubectl
 
-sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+# Install Docker
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
+  > /etc/apt/sources.list.d/docker.list
+apt-get update
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+usermod -aG docker ubuntu
 
-echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] \
-https://apt.kubernetes.io/ kubernetes-xenial main" | \
-sudo tee /etc/apt/sources.list.d/kubernetes.list > /dev/null
-
-sudo apt-get update
-sudo apt-get install -y kubectl
-kubectl version --client
-
-#INSTALL eksctl
-sudo apt update && sudo apt upgrade -y
-curl --silent --location "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz" -o eksctl.tar.gz
-tar -xzf eksctl.tar.gz
-sudo mv eksctl /usr/local/bin
-eksctl version
-rm eksctl.tar.gz
-
+# Install eksctl
+curl --silent --location "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+mv /tmp/eksctl /usr/local/bin
+ln -s /usr/local/bin/eksctl /usr/bin/eksctl
