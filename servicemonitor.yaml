@@ -1,0 +1,19 @@
+# servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: metrics-demo-monitor
+  namespace: monitoring
+  labels:
+    app: metrics-demo
+spec:
+  selector:
+    matchLabels:
+      app: metrics-demo
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+  namespaceSelector:
+    matchNames:
+    - default
