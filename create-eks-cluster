@@ -11,5 +11,5 @@ eksctl create cluster \
   --nodegroup-name workers \
   --node-type t3.medium \
   --nodes 2 \
-  --nodes-min 1 \
+  --nodes-min 2 \
   --nodes-max 4
