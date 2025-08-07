@@ -1,0 +1,52 @@
+# metrics-app.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-demo-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: metrics-demo
+  template:
+    metadata:
+      labels:
+        app: metrics-demo
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: app
+        image: prom/node-exporter:latest
+        ports:
+        - containerPort: 9100
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-demo-service
+  labels:
+    app: metrics-demo
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9100"
+spec:
+  selector:
+    app: metrics-demo
+  ports:
+  - name: metrics
+    port: 9100
+    targetPort: 9100
+  - name: http
+    port: 8080
+    targetPort: 8080
