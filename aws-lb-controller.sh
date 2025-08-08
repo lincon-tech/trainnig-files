@@ -1,6 +1,6 @@
 eksctl utils associate-iam-oidc-provider \
   --region us-east-1 \
-  --cluster my-first-cluster1 \
+  --cluster my-first-cluster \
   --approve
 
 eksctl create iamserviceaccount \
