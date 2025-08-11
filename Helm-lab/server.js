@@ -1,0 +1,38 @@
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(express.json());
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ status: 'healthy', service: 'MathCorp Calculator' });
+});
+
+// Calculator endpoints
+app.post('/add', (req, res) => {
+    const { a, b } = req.body;
+    res.json({ result: a + b, operation: 'addition' });
+});
+
+app.post('/subtract', (req, res) => {
+    const { a, b } = req.body;
+    res.json({ result: a - b, operation: 'subtraction' });
+});
+
+app.post('/multiply', (req, res) => {
+    const { a, b } = req.body;
+    res.json({ result: a * b, operation: 'multiplication' });
+});
+
+app.post('/divide', (req, res) => {
+    const { a, b } = req.body;
+    if (b === 0) {
+        return res.status(400).json({ error: 'Division by zero not allowed' });
+    }
+    res.json({ result: a / b, operation: 'division' });
+});
+
+app.listen(port, () => {
+    console.log(`MathCorp Calculator Service running on port ${port}`);
+});
