@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: mathcorp-calculator
+  repository: lincontech/mathcorp-calculator  #chnage to your own remote docker hub repositry
   pullPolicy: IfNotPresent
   tag: "v1.0.0"
 
