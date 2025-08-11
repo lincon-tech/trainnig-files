@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "mathcorp-calculator.fullname" . }}
+  name: {{ include "mathcorp-calculator-chart.fullname" . }}
   labels:
-    {{- include "mathcorp-calculator.labels" . | nindent 4 }}
+    {{- include "mathcorp-calculator-chart.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "mathcorp-calculator.selectorLabels" . | nindent 6 }}
+      {{- include "mathcorp-calculator-chart.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "mathcorp-calculator.selectorLabels" . | nindent 8 }}
+        {{- include "mathcorp-calculator-chart.selectorLabels" . | nindent 8 }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
