@@ -1,0 +1,23 @@
+replicaCount: 3
+
+resources:
+  limits:
+    cpu: 750m
+    memory: 768Mi
+  requests:
+    cpu: 375m
+    memory: 384Mi
+
+mathcorp:
+  environment: staging
+  logLevel: debug
+  features:
+    advancedMath: true
+
+ingress:
+  enabled: true
+  hosts:
+    - host: calculator-staging.mathcorp.com
+      paths:
+        - path: /
+          pathType: Prefix
