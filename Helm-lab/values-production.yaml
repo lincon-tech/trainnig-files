@@ -1,0 +1,29 @@
+replicaCount: 5
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+mathcorp:
+  environment: production
+  logLevel: warn
+  features:
+    advancedMath: true
+
+ingress:
+  enabled: true
+  hosts:
+    - host: calculator.mathcorp.com
+      paths:
+        - path: /
+          pathType: Prefix
