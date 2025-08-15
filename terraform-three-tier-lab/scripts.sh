@@ -1,23 +1,4 @@
 #!/bin/bash
-# yum update -y
-# yum install -y httpd
-# cat <<EOF > /var/www/html/index.html
-# <html>
-# <head>
-# <title>Movie Ticket Booking Platform</title>
-# </head>
-# <body style="font-family: Arial; text-align: center;">
-# <h1>Welcome to the Movie Ticket Booking Platform</h1>
-# <p>Deployed via Terraform & Auto Scaling</p>
-# <hr>
-# <p>Frontend Server IP: $(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)</p>
-# </body>
-# </html>
-# EOF
-# systemctl start httpd
-# systemctl enable httpd
-
-
 # Frontend instance setup script
 yum update -y
 yum install -y httpd
