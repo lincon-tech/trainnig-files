@@ -15,7 +15,7 @@ mkdir -p /opt/taskmaster
 cd /opt/taskmaster
 
 # Create a simple Node.js application
-cat > app.js << 'EOF'
+cat > app.js << EOF
 const express = require('express');
 const app = express();
 const port = 3000;
