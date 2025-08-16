@@ -22,6 +22,8 @@ resource "aws_instance" "app" {
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
     project_name = var.project_name
     environment  = var.environment
+    port         = var.port
+    
   }))
   
   tags = {

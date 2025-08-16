@@ -32,3 +32,9 @@ variable "app_security_group_id" {
   description = "ID of the app security group"
   type        = string
 }
+
+variable "port" {
+  description = "Application port"
+  type        = string
+  default     = "3000"
+}
