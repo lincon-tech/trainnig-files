@@ -1,24 +1,31 @@
 #!/bin/bash
 
 # Update system
-yum update -y
+sudo apt update -y
+sudo apt upgrade -y
 
-# Install Node.js
-curl -sL https://rpm.nodesource.com/setup_18.x | bash -
-yum install -y nodejs
+# Install curl and other prerequisites
+sudo apt install -y curl git build-essential
 
-# Install Git
-yum install -y git
+# Install Node.js 18
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs
+sudo apt install -y npm
+
+# Verify Node.js and npm installation
+node -v
+npm -v
 
 # Create application directory
-mkdir -p /opt/taskmaster
+sudo mkdir -p /opt/taskmaster
+sudo chown ubuntu:ubuntu /opt/taskmaster
 cd /opt/taskmaster
 
 # Create a simple Node.js application
-cat > app.js << EOF
+cat > app.js << 'EOF'
 const express = require('express');
 const app = express();
-const port = 3000;
+const app_port = 3000;
 
 // Serve static files
 app.use(express.static('public'));
@@ -73,8 +80,8 @@ app.get('/health', (req, res) => {
     });
 });
 
-app.listen(port, () => {
-    console.log(`TaskMaster app listening at http://localhost:${port}`);
+app.listen(app_port, () => {
+    console.log(`TaskMaster app listening at http://0.0.0.0:${app_port}`);
 });
 EOF
 
@@ -108,9 +115,9 @@ After=network.target
 
 [Service]
 Type=simple
-User=ec2-user
+User=ubuntu
 WorkingDirectory=/opt/taskmaster
-ExecStart=/usr/bin/node app.js
+ExecStart=/usr/bin/node /opt/taskmaster/app.js
 Restart=on-failure
 RestartSec=10
 Environment=NODE_ENV=production
@@ -120,12 +127,12 @@ WantedBy=multi-user.target
 EOF
 
 # Change ownership
-chown -R ec2-user:ec2-user /opt/taskmaster
+sudo chown -R ubuntu:ubuntu /opt/taskmaster
 
 # Enable and start the service
-systemctl daemon-reload
-systemctl enable taskmaster
-systemctl start taskmaster
+sudo systemctl daemon-reload
+sudo systemctl enable taskmaster
+sudo systemctl start taskmaster
 
-# Install CloudWatch agent (optional)
-yum install -y amazon-cloudwatch-agent
+# Optional: Install CloudWatch agent
+sudo apt install -y amazon-cloudwatch-agent
