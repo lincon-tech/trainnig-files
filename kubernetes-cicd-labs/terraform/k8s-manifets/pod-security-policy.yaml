@@ -1,0 +1,224 @@
+# Note: Pod Security Policies are deprecated in Kubernetes 1.25+
+# This file shows the legacy approach and modern Pod Security Standards approach
+
+# Legacy Pod Security Policy (for reference - deprecated)
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: portfoliotracker-psp
+  annotations:
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'runtime/default'
+    seccomp.security.alpha.kubernetes.io/defaultProfileName: 'runtime/default'
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  runAsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1000
+        max: 65535
+  seLinux:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'RunAsAny'
+
+---
+# Modern approach: Pod Security Standards (Kubernetes 1.23+)
+# This is applied via namespace labels (already configured in namespace.yaml)
+
+# Additional security constraints using ValidatingAdmissionWebhook
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionWebhook
+metadata:
+  name: portfoliotracker-security-webhook
+webhooks:
+- name: security.portfoliotracker.com
+  clientConfig:
+    service:
+      name: portfoliotracker-security-service
+      namespace: portfoliotracker
+      path: "/validate"
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+  admissionReviewVersions: ["v1", "v1beta1"]
+  sideEffects: None
+  failurePolicy: Fail
+
+---
+# Security Context Constraints for additional validation
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: security-constraints
+  namespace: portfoliotracker
+data:
+  security-rules.yaml: |
+    # Security constraints for PortfolioTracker application
+    constraints:
+      # Container Security
+      - name: "no-privileged-containers"
+        description: "Containers must not run in privileged mode"
+        rule: "spec.securityContext.privileged != true"
+        
+      - name: "no-root-user"
+        description: "Containers must not run as root user"
+        rule: "spec.securityContext.runAsUser != 0"
+        
+      - name: "read-only-root-filesystem"
+        description: "Root filesystem should be read-only where possible"
+        rule: "spec.securityContext.readOnlyRootFilesystem == true"
+        
+      - name: "drop-all-capabilities"
+        description: "All capabilities should be dropped"
+        rule: "spec.securityContext.capabilities.drop contains 'ALL'"
+        
+      # Resource Constraints
+      - name: "resource-limits-required"
+        description: "All containers must have resource limits"
+        rule: "spec.resources.limits.memory is defined AND spec.resources.limits.cpu is defined"
+        
+      - name: "resource-requests-required"
+        description: "All containers must have resource requests"
+        rule: "spec.resources.requests.memory is defined AND spec.resources.requests.cpu is defined"
+        
+      # Network Security
+      - name: "host-network-prohibited"
+        description: "Pods must not use host network"
+        rule: "spec.hostNetwork != true"
+        
+      - name: "host-pid-prohibited"
+        description: "Pods must not use host PID namespace"
+        rule: "spec.hostPID != true"
+        
+      - name: "host-ipc-prohibited"
+        description: "Pods must not use host IPC namespace"
+        rule: "spec.hostIPC != true"
+
+---
+# Example of Open Policy Agent (OPA) Gatekeeper ConstraintTemplate
+# This provides a more modern approach to policy enforcement
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: portfoliotrackersecurity
+spec:
+  crd:
+    spec:
+      names:
+        kind: PortfolioTrackerSecurity
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            allowedUsers:
+              type: array
+              items:
+                type: integer
+            allowedGroups:
+              type: array
+              items:
+                type: integer
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package portfoliotrackersecurity
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          container.securityContext.privileged == true
+          msg := "Privileged containers are not allowed"
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          container.securityContext.runAsUser == 0
+          msg := "Containers cannot run as root user (UID 0)"
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.limits.memory
+          msg := "Container must specify memory limits"
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.limits.cpu
+          msg := "Container must specify CPU limits"
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          container.securityContext.allowPrivilegeEscalation == true
+          msg := "Privilege escalation is not allowed"
+        }
+
+---
+# Apply the OPA Gatekeeper constraint
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: PortfolioTrackerSecurity
+metadata:
+  name: portfolio-security-constraint
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces: ["portfoliotracker"]
+  parameters:
+    allowedUsers: [1000, 1001, 1002]
+    allowedGroups: [1000, 1001, 1002]
+
+---
+# RBAC for Pod Security Policy (if using legacy PSP)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: portfoliotracker-psp-sa
+  namespace: portfoliotracker
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: portfoliotracker
+  name: portfoliotracker-psp-role
+rules:
+- apiGroups: ['policy']
+  resources: ['podsecuritypolicies']
+  verbs: ['use']
+  resourceNames:
+  - portfoliotracker-psp
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: portfoliotracker-psp-binding
+  namespace: portfoliotracker
+roleRef:
+  kind: Role
+  name: portfoliotracker-psp-role
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: portfoliotracker-sa
+  namespace: portfoliotracker
+- kind: ServiceAccount
+  name: portfoliotracker-psp-sa
+  namespace: portfoliotracker
