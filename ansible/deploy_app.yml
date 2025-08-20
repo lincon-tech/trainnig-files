@@ -1,0 +1,29 @@
+---
+- name: Deploy Web Application
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Install Apache Web Server
+      apt:
+        name: apache2
+        state: present
+        update_cache: yes
+
+    - name: Ensure Apache is running
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+
+    - name: Deploy Application Files
+      copy:
+        src: ./myapp/index.html
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: Open Firewall for HTTP (only for Ubuntu with ufw)
+      command: ufw allow 80
+      ignore_errors: yes
