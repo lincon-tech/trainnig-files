@@ -9,7 +9,7 @@ on:
 env:
   AWS_REGION: us-west-2
   EKS_CLUSTER_NAME: portfoliotracker-eks
-  DOCKER_IMAGE: portfoliotracker
+  DOCKER_IMAGE: portfoliotracker                 #REPLACE WITH IMAGE FROM YOUR DOCKERHUB
   NAMESPACE: portfoliotracker
 
 jobs:
